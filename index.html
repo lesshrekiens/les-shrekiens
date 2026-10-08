@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -198,6 +197,39 @@ section + section{border-top:1px solid var(--line-soft)}
 }
 .member-name{font-size:19px; font-weight:600; letter-spacing:-.01em}
 .member-role{margin-top:5px; font-size:12.5px; color:var(--ink-3); letter-spacing:.02em}
+
+/* ---------- CONTACT / EMAIL ---------- */
+.contact-card{
+  margin-top:26px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:20px; flex-wrap:wrap;
+  padding:20px 24px;
+  background:linear-gradient(150deg, var(--surface) 0%, var(--bg-2) 100%);
+  border:1px solid var(--line); border-radius:var(--radius);
+  transition:border-color .25s ease;
+}
+.contact-card:hover{border-color:var(--green-2)}
+.contact-label{
+  display:flex; align-items:center; gap:12px;
+  font-size:13px; font-weight:500; color:var(--ink-3);
+  letter-spacing:.06em; text-transform:uppercase;
+}
+.contact-label svg{
+  width:18px; height:18px; flex:none; color:var(--green);
+}
+.contact-email{
+  font-family:'Fraunces',serif; font-size:clamp(17px,2.6vw,20px); font-weight:600;
+  color:var(--ink); letter-spacing:-.01em;
+  display:inline-flex; align-items:center; gap:10px;
+  transition:color .18s ease;
+  word-break:break-all;
+}
+.contact-email::after{
+  content:'→'; font-family:'Inter',sans-serif; font-size:16px; color:var(--green);
+  transition:transform .25s cubic-bezier(.16,1,.3,1);
+}
+.contact-email:hover{color:var(--green)}
+.contact-email:hover::after{transform:translateX(4px)}
 
 /* ---------- NEXT RACE ---------- */
 .next-card{
@@ -443,6 +475,7 @@ footer{
   .next-card{padding:22px 20px}
   .gallery{grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:9px}
   .foot-inner{flex-direction:column; align-items:flex-start; gap:18px}
+  .contact-card{flex-direction:column; align-items:flex-start; padding:18px 20px}
 }
 @media (max-width:400px){
   .wrap{padding:0 18px}
@@ -518,6 +551,17 @@ footer{
         <p class="member-role">Chef du groupe · Secrétaire</p>
       </article>
     </div>
+
+    <div class="contact-card">
+      <span class="contact-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="M2 7l10 7 10-7"/>
+        </svg>
+        Nous contacter
+      </span>
+      <a class="contact-email" href="mailto:lesshrekiens@gmail.com">lesshrekiens@gmail.com</a>
+    </div>
   </div></section>
 
   <section id="races"><div class="wrap reveal">
@@ -572,9 +616,6 @@ footer{
 </div>
 
 <script>
-/* ---------------------------------------------------------------
-   État
----------------------------------------------------------------- */
 let db = null, assets = null, user = null, canEdit = false, editing = false;
 let content = {
   title: "LES SHREKIENS",
@@ -582,9 +623,6 @@ let content = {
 };
 let races = [], gallery = [];
 
-/* ---------------------------------------------------------------
-   Utilitaires
----------------------------------------------------------------- */
 function escapeHtml(s){
   const d = document.createElement('div');
   d.textContent = s == null ? '' : String(s);
@@ -617,9 +655,6 @@ function formatDate(iso){
   return d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
 }
 
-/* ---------------------------------------------------------------
-   Rendu : contenu éditable
----------------------------------------------------------------- */
 function renderContent(){
   document.querySelectorAll('[data-editable][data-doc="site/content"]').forEach(el => {
     const f = el.dataset.field;
@@ -627,9 +662,6 @@ function renderContent(){
   });
 }
 
-/* ---------------------------------------------------------------
-   Rendu : stats
----------------------------------------------------------------- */
 function renderStats(){
   const set = (k, v) => document.querySelectorAll('[data-stat="' + k + '"]').forEach(e => e.textContent = v);
   set('members', document.querySelectorAll('.member').length);
@@ -637,9 +669,6 @@ function renderStats(){
   set('photos', gallery.length);
 }
 
-/* ---------------------------------------------------------------
-   Rendu : courses
----------------------------------------------------------------- */
 function renderRaces(){
   const list = document.getElementById('racesList');
   const slot = document.getElementById('nextRaceSlot');
@@ -710,9 +739,6 @@ function renderRaces(){
   });
 }
 
-/* ---------------------------------------------------------------
-   Rendu : galerie
----------------------------------------------------------------- */
 function renderGallery(){
   const grid = document.getElementById('galleryGrid');
   document.getElementById('galCount').textContent = gallery.length ? gallery.length + ' photo(s)' : '';
@@ -762,9 +788,6 @@ function renderGallery(){
   if(tile) tile.addEventListener('click', () => document.getElementById('fileInput').click());
 }
 
-/* ---------------------------------------------------------------
-   Lightbox
----------------------------------------------------------------- */
 const lb = document.getElementById('lightbox');
 function openLightbox(url, caption){
   if(!url) return;
@@ -784,9 +807,6 @@ document.getElementById('lbClose').addEventListener('click', closeLightbox);
 lb.addEventListener('click', (e) => { if(e.target === lb) closeLightbox(); });
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && lb.classList.contains('show')) closeLightbox(); });
 
-/* ---------------------------------------------------------------
-   Mode édition
----------------------------------------------------------------- */
 function setEditingUI(){
   document.body.classList.toggle('editing', editing);
   const fab = document.getElementById('editFab');
@@ -808,9 +828,6 @@ async function saveField(el){
   catch(err){ toast('Échec de la sauvegarde'); }
 }
 
-/* ---------------------------------------------------------------
-   Initialisation
----------------------------------------------------------------- */
 async function init(){
   db     = await claude.use('db').catch(() => null);
   assets = await claude.use('assets').catch(() => null);
@@ -873,7 +890,6 @@ async function init(){
     catch(err){ toast('Ajout impossible'); }
   });
 
-  /* input fichier */
   const fi = document.createElement('input');
   fi.type = 'file';
   fi.accept = 'image/*';
@@ -898,9 +914,6 @@ async function init(){
   });
 }
 
-/* ---------------------------------------------------------------
-   Reveal au scroll
----------------------------------------------------------------- */
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
@@ -908,9 +921,6 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-/* ---------------------------------------------------------------
-   Nav : état au scroll
----------------------------------------------------------------- */
 const navEl = document.getElementById('nav');
 const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 8);
 onScroll();
